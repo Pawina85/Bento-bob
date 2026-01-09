@@ -5,9 +5,9 @@ import PromoBanner from '@/Components/PromoBanner';
 export default function Home() {
   return (  
     <>
+    <PromoBanner />
       <Navbar />
-      <main className="min-h-screen bg-white pt-16 md:pt-20">
-      <PromoBanner />
+      <main className="min-h-screen bg-white ">
       <Hero />
      </main>
      </>
