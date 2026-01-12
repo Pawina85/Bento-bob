@@ -1,6 +1,7 @@
 import Navbar from '@/Components/Navbar';
 import Hero from '@/Components/Hero';
 import PromoBanner from '@/Components/PromoBanner';
+import MenuSection from '@/Components/MenuSection';
 
 export default function Home() {
   return (  
@@ -9,6 +10,7 @@ export default function Home() {
       <Navbar />
       <main className="min-h-screen bg-white ">
       <Hero />
+      <MenuSection />
      </main>
      </>
   );
