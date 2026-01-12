@@ -15,6 +15,8 @@ export default function PromoBanner() {
     const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
 
+    console.log("PromoBanner isVisible:", isVisible);
+
     useEffect(() => {
         const dismissed = localStorage.getItem(STORAGE_KEY);
         if (!dismissed) {
