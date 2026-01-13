@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { categories, menuItems, type CategoryId } from '@/data/menuData';
+import { get } from 'http';
 
 export default function MenuSection() {
   const [activeCategory, setActiveCategory] = useState<CategoryId>('bento');
@@ -83,6 +84,20 @@ export default function MenuSection() {
   </span>
 
   {/* Quantity Controls */}
+  {/* Quantity Controls */}
+{getQuantity(item.id) === 0 ? (
+  <button
+    onClick={() => addItem({
+      id: String(item.id),
+      name: item.name,
+      price: item.price,
+      image: item.image,
+    })}
+    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-full transition-colors"
+  >
+    + 
+  </button>
+) : (
   <div className="flex items-center gap-3">
     <button
       onClick={() => updateQuantity(String(item.id), getQuantity(item.id) - 1)}
@@ -90,30 +105,21 @@ export default function MenuSection() {
     >
       -
     </button>
-    <span className="w-8 text-center font-semibold">
+    <span className="w-6 text-center font-semibold text-gray-900">
       {getQuantity(item.id)}
     </span>
     <button
-      onClick={() => {
-        if (getQuantity(item.id) === 0) {
-          addItem({
-            id: String(item.id),
-            name: item.name,
-            price: item.price,
-            image: item.image,
-          });
-        } else {
-          updateQuantity(String(item.id), getQuantity(item.id) + 1);
-        }
-      }}
+      onClick={() => updateQuantity(String(item.id), getQuantity(item.id) + 1)}
       className="w-8 h-8 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-gray-900 font-bold transition-colors"
     >
       +
     </button>
   </div>
+)}
+  </div>
 </div>
               </div>
-            </div>
+            
           ))}
         </div>
 
