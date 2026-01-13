@@ -3,6 +3,7 @@
 import { useCart } from '@/Components/CartContext';
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { categories, menuItems, type CategoryId } from '@/data/menuData';
 
 export default function MenuSection() {
@@ -14,7 +15,7 @@ export default function MenuSection() {
 
   const getQuantity = (id: number) => {
     const cartItem = items.find(item => item.id === String(id));
-    return cartItem? .quantity || 0;
+    return cartItem?.quantity || 0;
   }
  
 
@@ -89,7 +90,7 @@ export default function MenuSection() {
     >
       -
     </button>
-    <span className="w-6 text-center font-semibold">
+    <span className="w-8 text-center font-semibold">
       {getQuantity(item.id)}
     </span>
     <button
@@ -119,11 +120,12 @@ export default function MenuSection() {
         {/* See More Button */}
         <div className="text-center">
           
-          <a  href="/menu"
+          <Link
+            href="/menu"
             className="inline-block border-2 border-yellow-400 text-gray-900 hover:bg-yellow-400 font-semibold px-8 py-3 rounded-full transition-all"
           >
             See Full Menu
-          </a>
+          </Link>
         </div>
 
       </div>

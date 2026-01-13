@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 
 
 export default function Hero() {
@@ -16,10 +17,11 @@ export default function Hero() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-8 mb-12">
             {images.map((image, index) => (
                 <div key={index} className="relative overflow-hidden rounded-2xl shadow-lg group">
-                    <img
+                    <Image
                         src={image.src}
                         alt={image.alt}
-                        className="w-full h-64 md:h-72 object-cover group-hover:scale-105 transition-transform duration-300"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"/>
                     </div>
