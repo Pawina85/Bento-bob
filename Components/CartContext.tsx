@@ -1,6 +1,6 @@
 'use client';
 
-import { clear } from 'console';
+
 import { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface CartItem {
@@ -34,6 +34,7 @@ export interface CartItem {
         updateQuantity: (id: string, quantity: number) => void;
         clearCart: () => void;
         openCart: () => void;
+        closeCart: () => void;  
         openCheckout: () => void;
         closeCheckout: () => void;
         openConfirmation: (order: Order) => void;
@@ -41,7 +42,7 @@ export interface CartItem {
     }
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export function cartProvider({ children }: { children: ReactNode }) {
+export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -52,7 +53,7 @@ export function cartProvider({ children }: { children: ReactNode }) {
     const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
-        setItems((prev) => {
+        setItems((prev) => {            
             const existingItem = prev.find((item) => item.id === newItem.id);
             if (existingItem) {
                 return prev.map((item) =>
@@ -93,7 +94,7 @@ export function cartProvider({ children }: { children: ReactNode }) {
     };
 
     const openCheckout = () => {
-        setIsCheckoutOpen(false);
+        setIsCheckoutOpen(true);
     };
     const closeCheckout = () => {
         setIsCheckoutOpen(false);
@@ -125,6 +126,7 @@ export function cartProvider({ children }: { children: ReactNode }) {
                 updateQuantity,
                 clearCart,
                 openCart,
+                closeCart,
                 openCheckout,
                 closeCheckout,
                 openConfirmation,
