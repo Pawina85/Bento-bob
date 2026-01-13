@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useCart } from './CartContext';
 import { menuItems } from '@/data/menuData';
 
@@ -18,6 +20,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<typeof menuItems>([]);
   const router = useRouter();
+  const { totalItems } = useCart();
 
   // Function to handle search
   const handleSearch = (query: string) => {
@@ -55,26 +58,37 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 md:h-20">
 
           {/* Logo */}
-          <a href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
               <span className="text-xl">🍱</span>
             </div>
             <span className="text-xl font-bold text-gray-800">
               Bento <span className="text-yellow-500">Bop</span>
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Nav Links */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-gray-600 hover:text-yellow-500 font-medium transition-colors relative group"
-              >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300" />
-              </a>
+              link.href.startsWith('/') ? (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-gray-600 hover:text-yellow-500 font-medium transition-colors relative group"
+                >
+                  {link.name}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300" />
+                </Link>
+              ) : (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="text-gray-600 hover:text-yellow-500 font-medium transition-colors relative group"
+                >
+                  {link.name}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300" />
+                </a>
+              )
             ))}
           </div>
 
@@ -90,22 +104,24 @@ export default function Navbar() {
             </button>
 
             {/* Login */}
-            <a
+            <Link
             href="/login"
             className="p-2 text-gray-600 hover:text-yellow-500 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-            </a>
+            </Link>
 
             {/* Cart */}
             <button className="p-2 text-gray-600 hover:text-yellow-500 transition-colors relative">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
+              {totalItems > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 text-xs font-bold rounded-full flex items-center justify-center">
-                0
+                {totalItems}
               </span>
+              )}
             </button>
           </div>
 
@@ -126,9 +142,11 @@ export default function Navbar() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
+              {totalItems > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 text-xs font-bold rounded-full flex items-center justify-center">
-                0
+                {totalItems}
               </span>
+                )}
             </button>
 
             {/* Menu Toggle */}
@@ -153,18 +171,29 @@ export default function Navbar() {
           <div className="md:hidden py-4 border-t border-gray-100">
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 font-medium px-4 py-3 rounded-lg transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.name}
-                </a>
+                link.href.startsWith('/') ? (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className="text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 font-medium px-4 py-3 rounded-lg transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    className="text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 font-medium px-4 py-3 rounded-lg transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </a>
+                )
               ))}
 
               {/* Login in Mobile Menu */}
-              <a
+              <Link
                 href="/login"
                 className="text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 font-medium px-4 py-3 rounded-lg transition-colors flex items-center gap-2"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -173,7 +202,7 @@ export default function Navbar() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Login / Sign Up
-              </a>
+              </Link>
             </div>
           </div>
         )}
@@ -197,7 +226,7 @@ export default function Navbar() {
             {searchResults.length > 0 && (
               <div className="max-w-2xl mx-auto mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
                 {searchResults.slice(0, 5).map(item => (
-                  <a
+                  <Link
                     key={item.id}
                     href={`/menu?search=${encodeURIComponent(item.name)}`}
                     className="flex items-center gap-3 p-3 hover:bg-yellow-50 transition-colors border-b border-gray-50 last:border-b-0"
@@ -207,13 +236,13 @@ export default function Navbar() {
                       setSearchResults([]);
                     }}
                   >
-                    <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                    <Image src={item.image} alt={item.name} width={48} height={48} className="w-12 h-12 rounded-lg object-cover" />
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{item.name}</p>
                       <p className="text-sm text-gray-500">{item.description}</p>
                     </div>
                     <span className="text-yellow-500 font-bold">${item.price.toFixed(2)}</span>
-                  </a>
+                  </Link>
                 ))}
               </div>
             )}

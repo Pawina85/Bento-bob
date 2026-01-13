@@ -1,22 +1,24 @@
 'use client';
 
+import { useCart } from '@/Components/CartContext';
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { categories, menuItems, type CategoryId } from '@/data/menuData';
+import { get } from 'http';
 
 export default function MenuSection() {
   const [activeCategory, setActiveCategory] = useState<CategoryId>('bento');
-  const [quantities, setQuantities] = useState<Record<number, number>>({});
+   const { items, addItem, updateQuantity } = useCart();
 
   const filteredItems = menuItems.filter(item => item.category === activeCategory);
   const displayedItems = filteredItems.slice(0, 6); // Show max 6 items
 
-  const updateQuantity = (id: number, change: number) => {
-    setQuantities(prev => ({
-      ...prev,
-      [id]: Math.max(0, (prev[id] || 0) + change)
-    }));
-  };
+  const getQuantity = (id: number) => {
+    const cartItem = items.find(item => item.id === String(id));
+    return cartItem?.quantity || 0;
+  }
+ 
 
   return (
     <section id="menu" className="py-16 px-4 bg-white">
@@ -75,43 +77,61 @@ export default function MenuSection() {
                 </p>
 
                 {/* Price & Quantity */}
-                <div className="flex items-center justify-between">
-                  <span className="text-yellow-500 font-bold text-lg">
-                    ${item.price.toFixed(2)}
-                  </span>
+                {/* Price & Quantity */}
+<div className="flex items-center justify-between">
+  <span className="text-yellow-500 font-bold text-lg">
+    ${item.price.toFixed(2)}
+  </span>
 
-                  {/* Quantity Controls */}
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => updateQuantity(item.id, -1)}
-                      className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold transition-colors"
-                    >
-                      -
-                    </button>
-                    <span className="w-6 text-center font-semibold">
-                      {quantities[item.id] || 0}
-                    </span>
-                    <button
-                      onClick={() => updateQuantity(item.id, 1)}
-                      className="w-8 h-8 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-gray-900 font-bold transition-colors"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
+  {/* Quantity Controls */}
+  {/* Quantity Controls */}
+{getQuantity(item.id) === 0 ? (
+  <button
+    onClick={() => addItem({
+      id: String(item.id),
+      name: item.name,
+      price: item.price,
+      image: item.image,
+    })}
+    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-full transition-colors"
+  >
+    + 
+  </button>
+) : (
+  <div className="flex items-center gap-3">
+    <button
+      onClick={() => updateQuantity(String(item.id), getQuantity(item.id) - 1)}
+      className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold transition-colors"
+    >
+      -
+    </button>
+    <span className="w-6 text-center font-semibold text-gray-900">
+      {getQuantity(item.id)}
+    </span>
+    <button
+      onClick={() => updateQuantity(String(item.id), getQuantity(item.id) + 1)}
+      className="w-8 h-8 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-gray-900 font-bold transition-colors"
+    >
+      +
+    </button>
+  </div>
+)}
+  </div>
+</div>
               </div>
-            </div>
+            
           ))}
         </div>
 
         {/* See More Button */}
         <div className="text-center">
           
-          <a  href="/menu"
+          <Link
+            href="/menu"
             className="inline-block border-2 border-yellow-400 text-gray-900 hover:bg-yellow-400 font-semibold px-8 py-3 rounded-full transition-all"
           >
             See Full Menu
-          </a>
+          </Link>
         </div>
 
       </div>

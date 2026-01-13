@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Navbar from '@/Components/Navbar';
 import { categories, menuItems } from '@/data/menuData';
 
@@ -50,7 +51,7 @@ export default function MenuPage() {
                     className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
                     >
                         <div className="relative h-48 overflow-hidden">
-                            <img 
+                            <Image
                             src={item.image}
                             alt={item.name}
                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
