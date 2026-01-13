@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCart } from './CartContext';
+import { menuItems } from '@/data/menuData';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -11,6 +14,40 @@ const navLinks = [
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<typeof menuItems>([]);
+  const router = useRouter();
+
+  // Function to handle search
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+
+    if (query.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+
+    // Filter menu items that match the search query
+    const filtered = menuItems.filter(item =>
+      item.name.toLowerCase().includes(query.toLowerCase()) ||
+      item.description.toLowerCase().includes(query.toLowerCase()) ||
+      item.category.toLowerCase().includes(query.toLowerCase())
+    );
+
+    setSearchResults(filtered);
+  };
+
+  // Function to handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/menu?search=${encodeURIComponent(searchQuery)}`);
+      setIsSearchOpen(false);
+      setSearchQuery('');
+      setSearchResults([]);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -44,18 +81,22 @@ export default function Navbar() {
           {/* Right Icons - Desktop */}
           <div className="hidden md:flex items-center gap-4">
             {/* Search */}
-            <button className="p-2 text-gray-600 hover:text-yellow-500 transition-colors">
+            <button 
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            className={`p-2 transition-colors ${isSearchOpen ? 'text-yellow-500' : 'text-gray-600 hover:text-yellow-500 '}`}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
 
             {/* Login */}
-            <button className="p-2 text-gray-600 hover:text-yellow-500 transition-colors">
+            <a
+            href="/login"
+            className="p-2 text-gray-600 hover:text-yellow-500 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-            </button>
+            </a>
 
             {/* Cart */}
             <button className="p-2 text-gray-600 hover:text-yellow-500 transition-colors relative">
@@ -71,7 +112,10 @@ export default function Navbar() {
           {/* Right Icons - Mobile */}
           <div className="flex md:hidden items-center gap-2">
             {/* Search */}
-            <button className="p-2 text-gray-600 hover:text-yellow-500 transition-colors">
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className={`p-2 transition-colors ${isSearchOpen ? 'text-yellow-500' : 'text-gray-600 hover:text-yellow-500'}`}
+            >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -133,7 +177,55 @@ export default function Navbar() {
             </div>
           </div>
         )}
+        {isSearchOpen && (
+        <div className="border-t border-gray-100 p-4">
+            <form className="max-w-2xl mx-auto flex gap-2" onSubmit={handleSubmit}>
+                <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                placeholder="Search for bento, drinks, and desserts..."
+                autoFocus
+                className="flex-1 px-4 py-3 rounded-full border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"/>
+            <button type="submit"
+            className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium rounded-full transition-colors">
+                Search
+            </button>
+            </form>
 
+            {/* Live Search Results Dropdown */}
+            {searchResults.length > 0 && (
+              <div className="max-w-2xl mx-auto mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                {searchResults.slice(0, 5).map(item => (
+                  <a
+                    key={item.id}
+                    href={`/menu?search=${encodeURIComponent(item.name)}`}
+                    className="flex items-center gap-3 p-3 hover:bg-yellow-50 transition-colors border-b border-gray-50 last:border-b-0"
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      setSearchQuery('');
+                      setSearchResults([]);
+                    }}
+                  >
+                    <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{item.name}</p>
+                      <p className="text-sm text-gray-500">{item.description}</p>
+                    </div>
+                    <span className="text-yellow-500 font-bold">${item.price.toFixed(2)}</span>
+                  </a>
+                ))}
+              </div>
+            )}
+
+            {/* No Results Message */}
+            {searchQuery.trim() !== '' && searchResults.length === 0 && (
+              <div className="max-w-2xl mx-auto mt-2 p-4 text-center text-gray-500">
+                No items found for "{searchQuery}"
+              </div>
+            )}
+        </div>
+        )}
       </nav>
     </header>
   );
