@@ -19,7 +19,7 @@ export default function MenuSection() {
   };
 
   return (
-    <section id="menu" className="py-16 px-4 bg-gray-50">
+    <section id="menu" className="py-16 px-4 bg-white">
       <div className="max-w-7xl mx-auto">
         
         {/* Section Title */}
