@@ -5,7 +5,6 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { categories, menuItems, type CategoryId } from '@/data/menuData';
-import { get } from 'http';
 
 export default function MenuSection() {
   const [activeCategory, setActiveCategory] = useState<CategoryId>('bento');
