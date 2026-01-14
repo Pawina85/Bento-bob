@@ -16,11 +16,13 @@ export default function Hero() {
                     <p className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">welcome to <span className="text-yellow-500 font-semibold">Bento Bop</span></p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-8 mb-12">
             {images.map((image, index) => (
-                <div key={index} className="relative overflow-hidden rounded-2xl shadow-lg group">
+                <div key={index} className="relative h-48 md:h-64 lg:h-72overflow-hidden rounded-2xl shadow-lg group">
                     <Image
                         src={image.src}
                         alt={image.alt}
                         fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                        priority={index === 0}
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"/>
