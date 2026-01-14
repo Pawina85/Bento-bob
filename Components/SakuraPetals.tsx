@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function SakuraPetals() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,8 +57,20 @@ export default function SakuraPetals() {
       });
     }
 
+    // Fade out petals when scrolling past hero section
+    gsap.to(containerRef.current, {
+      opacity: 0,
+      scrollTrigger: {
+        trigger: 'body',
+        start: 'top top',
+        end: '600px top',
+        scrub: true,
+      },
+    });
+
     return () => {
       petals.forEach((petal) => petal.remove());
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
   }, []);
 
