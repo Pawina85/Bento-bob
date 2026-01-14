@@ -63,6 +63,7 @@ export default function MenuSection() {
                   src={item.image}
                   alt={item.name}
                   fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="object-cover hover:scale-105 transition-transform duration-300"
                 />
               </div>
