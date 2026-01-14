@@ -9,9 +9,9 @@ import { menuItems } from '@/data/menuData';
 
 const navLinks = [
   { name: 'Home', href: '/' },
-  { name: 'About', href: '#about' },
-  { name: 'Menu', href: '#menu' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'About', href: '/about' },
+  { name: 'Menu', href: '/menu' },
+  { name: 'Contact', href: '/contact' },
 ];
 
 export default function Navbar() {

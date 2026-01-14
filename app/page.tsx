@@ -3,12 +3,14 @@ import Hero from '@/Components/Hero';
 import PromoBanner from '@/Components/PromoBanner';
 import MenuSection from '@/Components/MenuSection';
 import Footer from '@/Components/Footer';
+import SakuraPetals from '@/Components/SakuraPetals';
 
 export default function Home() {
   return (  
     <>
     <PromoBanner />
       <Navbar />
+      <SakuraPetals />
       <main className="min-h-screen bg-white ">
       <Hero />
       <MenuSection />
