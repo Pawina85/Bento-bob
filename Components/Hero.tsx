@@ -5,11 +5,11 @@ import gsap from 'gsap';
 
 
 export default function Hero() {
-    const heroRef = useRef<HTMLElement>(null);
+    const heroRef = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLHeadingElement>(null);
     const subtitleRef = useRef<HTMLParagraphElement>(null);
     const imagesRef = useRef<HTMLDivElement>(null);
-    const buttonRef = useRef<HTMLAnchorElement>(null);
+    const ctaLinkRef = useRef<HTMLAnchorElement>(null);
 
     const images = [
         { src: '/Image/hero1.jpg', alt: 'the restaurant' },
@@ -47,7 +47,7 @@ export default function Hero() {
             '-=0.3'
         );
         tl.fromTo(
-            buttonRef.current,
+            ctaLinkRef.current,
             { scale: 0, opacity: 0 },
             { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.7)' },
             '-=0.2'
@@ -78,7 +78,7 @@ export default function Hero() {
             ))}
                     
             </div>          
-                <a href="#menu" ref={buttonRef} className="inline-block bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold text-lg px-8 py-3 rounded-full transition-all hover:scale-105 hover:shadow-lg">Explore Our Menu</a>
+                <a href="#menu" ref={ctaLinkRef} className="inline-block bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold text-lg px-8 py-3 rounded-full transition-all hover:scale-105 hover:shadow-lg">Explore Our Menu</a>
             
         </div>
     </section>
