@@ -77,14 +77,14 @@ export default function ContactPage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   onFocus={() => setFocused({ ...focused, name: true })}
                   onBlur={() => setFocused({ ...focused, name: false })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all peer"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all peer text-gray-900"
                   placeholder=" "
                 />
                 <label className={`absolute left-4 transition-all pointer-events-none
                   ${formData.name || focused.name
-                    ? 'top-1 text-xs text-yellow-500'
-                    : 'top-3 text-gray-800'}`}>
-                  Your Name
+                    ? 'top-1 text-xs text-yellow-600 font-medium'
+                    : 'top-3 text-gray-500'}`}>
+                   Name
                 </label>
               </div>
 
@@ -97,14 +97,14 @@ export default function ContactPage() {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   onFocus={() => setFocused({ ...focused, email: true })}
                   onBlur={() => setFocused({ ...focused, email: false })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all peer"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all peer text-gray-900"
                   placeholder=" "
                 />
                 <label className={`absolute left-4 transition-all pointer-events-none
                   ${formData.email || focused.email
-                    ? 'top-1 text-xs text-yellow-500'
-                    : 'top-3 text-gray-800'}`}>
-                  Your Email
+                    ? 'top-1 text-xs text-yellow-600 font-medium'
+                    : 'top-3 text-gray-500'}`}>
+                  Email
                 </label>
               </div>
 
@@ -117,13 +117,13 @@ export default function ContactPage() {
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   onFocus={() => setFocused({ ...focused, message: true })}
                   onBlur={() => setFocused({ ...focused, message: false })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all peer resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all peer resize-none text-gray-900"
                   placeholder=" "
                 />
                 <label className={`absolute left-4 transition-all pointer-events-none
                   ${formData.message || focused.message
-                    ? 'top-1 text-xs text-yellow-500'
-                    : 'top-3 text-gray-800'}`}>
+                    ? 'top-1 text-xs text-yellow-600 font-medium'
+                    : 'top-3 text-gray-500'}`}>
                   Comment
                 </label>
               </div>
