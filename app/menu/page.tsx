@@ -54,7 +54,9 @@ export default function MenuPage() {
                             <Image
                             src={item.image}
                             alt={item.name}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                            className="object-cover hover:scale-105 transition-transform duration-300"
                             />
                         </div>
  
