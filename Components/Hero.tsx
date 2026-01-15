@@ -69,7 +69,7 @@ export default function Hero() {
                         src={image.src}
                         alt={image.alt}
                         fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                        sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, 30vw"
                         priority={index === 0}
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
