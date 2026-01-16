@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Navbar from '@/Components/Navbar';
 import Footer from '@/Components/Footer';
 
@@ -8,15 +9,12 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: '',
+    phone: '',
+    comment: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [focused, setFocused] = useState({
-    name: false,
-    email: false,
-    message: false,
-  });
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +24,7 @@ export default function ContactPage() {
     setTimeout(() => {
       setIsSubmitting(false);
       setSubmitted(true);
-      setFormData({ name: '', email: '', message: '' });
+      setFormData({ name: '', email: '', phone: '', comment: '' });
     }, 1000);
   };
 
@@ -34,109 +32,84 @@ export default function ContactPage() {
     <>
       <Navbar />
 
-      <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-16 relative z-10">
-        <div className="max-w-xl mx-auto px-4 py-4">
+      <main className="min-h-screen bg-stone-100 pt-20">
+        <div className="max-w-2xl mx-auto px-4 py-4 md:py-16">
 
           {/* Header - moved closer to top */}
-          <div className="text-center mb-4">
+          
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Restaurant Location
+              Contact Us
             </h1>
-          </div>
+          
 
-          {/* Google Map - smaller, matching form width */}
-          <div className="rounded-xl overflow-hidden shadow-md mb-6 h-48 md:h-56">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509374!2d144.9537353153166!3d-37.81627974202195!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf577d6f5d4e0b8b5!2sFederation%20Square!5e0!3m2!1sen!2sau!4v1614031234567!5m2!1sen!2sau"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Restaurant Location"
-            />
-          </div>
-
-          <div className="text-center mt-8 mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Contact Us</h2>
+          
+          <div className="text-center mb-10 space-y-1 text-gray-700">
+            <p>Address: 123 Sukhumvit Road, Bangkok, Thailand 10110</p>
+            <p>
+              Email:{' '}
+              <Link href="mailto:hello@bentobop.com"
+              className="underline hover:text-yellow-600 transition-colors"
+              >hello@bentobop.com</Link>
+            </p>
+          <p>Phone: +66 1234 5678</p>
           </div>
 
           {submitted ? (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-              <p className="text-green-700 font-medium">Thank you! Your message has been sent.</p>
+            <div className="text-center py-12">
+              <span className='text-5xl mb-4 block'>🎉</span>
+              <h3 className="text-2xl font-serif text-gray-900 mb-2">Message Sent</h3>
+              <p className="text-gray-600 mb-6">We&apos;ll get back to you shortly.</p>
+            <button onClick={() => setSubmitted(false)}
+              className="text-gray-900 underline hover:text-yellow-600 transition-colors">
+              Send another message
+            </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name field with floating label */}
-              <div className="relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  onFocus={() => setFocused({ ...focused, name: true })}
-                  onBlur={() => setFocused({ ...focused, name: false })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all peer text-gray-900"
-                  placeholder=" "
+                  className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors"
+                  placeholder="Name"
                 />
-                <label className={`absolute left-4 transition-all pointer-events-none
-                  ${formData.name || focused.name
-                    ? 'top-1 text-xs text-yellow-600 font-medium'
-                    : 'top-3 text-gray-500'}`}>
-                   Name
-                </label>
-              </div>
-
-              {/* Email field with floating label */}
-              <div className="relative">
                 <input
                   type="email"
-                  required
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  onFocus={() => setFocused({ ...focused, email: true })}
-                  onBlur={() => setFocused({ ...focused, email: false })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all peer text-gray-900"
-                  placeholder=" "
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value})}
+                  className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors"
+                  placeholder="Email 8"
                 />
-                <label className={`absolute left-4 transition-all pointer-events-none
-                  ${formData.email || focused.email
-                    ? 'top-1 text-xs text-yellow-600 font-medium'
-                    : 'top-3 text-gray-500'}`}>
-                  Email
-                </label>
               </div>
 
-              {/* Message field with floating label */}
-              <div className="relative">
-                <textarea
-                  required
-                  rows={4}
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  onFocus={() => setFocused({ ...focused, message: true })}
-                  onBlur={() => setFocused({ ...focused, message: false })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all peer resize-none text-gray-900"
-                  placeholder=" "
-                />
-                <label className={`absolute left-4 transition-all pointer-events-none
-                  ${formData.message || focused.message
-                    ? 'top-1 text-xs text-yellow-600 font-medium'
-                    : 'top-3 text-gray-500'}`}>
-                  Comment
-                </label>
-              </div>
+              <input type="tel" 
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value})}
+              className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors"
+              placeholder="Phone number" />
 
+              <textarea
+              required
+              rows={5}
+              value={formData.comment}
+              onChange={(e) => setFormData({ ...formData, comment: e.target.value})}
+              className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors"
+              placeholder="Comment"
+              />
               <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-yellow-400 text-white font-semibold py-3 rounded-xl hover:bg-yellow-500 transition-colors disabled:opacity-50"
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-stone-800 hover:bg-stone-900 disabled:bg-stone-600 text-white px-8 rounded-sm focus:outline-none focus:border-gray-900 transition-colors resize-none"
               >
                 {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
             </form>
           )}
+       
+              
         </div>
       </main>
 
