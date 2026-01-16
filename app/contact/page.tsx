@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Navbar from '@/Components/Navbar';
 import Footer from '@/Components/Footer';
 
+
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -112,8 +113,9 @@ export default function ContactPage() {
               
         </div>
       </main>
-
       <Footer />
+
+      
     </>
   );
 }
