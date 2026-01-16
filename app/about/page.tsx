@@ -2,6 +2,7 @@
 
 import Navbar from '@/Components/Navbar';
 import Footer from '@/Components/Footer';
+import Link from 'next/link';
 
 export default function AboutPage() {
     return (
@@ -18,10 +19,10 @@ export default function AboutPage() {
       <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
         📖 Our Story
       </h2>
-      <p className="text-gray-600 leading-relaxed mb-3">
-        Back in 2020, Bento Bop started with a simple idea — fresh, authentic Japanese bento made with love. What began as a small kitchen project has grown into a place where good food meets happy people.
+      <p className="text-gray-700 leading-relaxed text-lg mb-3">
+        Back in 2020, Bento Bop started with a simple idea — fresh, authentic Japanese bento made with love.<br />What began as a small kitchen project has grown into a place where good food meets happy people.
       </p>
-      <p className="text-gray-600 leading-relaxed">
+      <p className="text-gray-700 leading-relaxed text-lg">
         We&apos;re not a big chain. We&apos;re just a small team who believes great food should be simple, honest, and make your day better.
       </p>
     </div>
@@ -75,15 +76,20 @@ export default function AboutPage() {
     </div>
 
     {/* Visit Us Card */}
-    <div className="bg-yellow-400 rounded-2xl p-6 md:p-8 mt-6">
+    <div className="bg-yellow-100 rounded-2xl p-6 md:p-8 mt-6 text-md">
       <p className="text-gray-900">
-        Welcome to Bento Bop! We serve fresh, authentic Japanese bento made with love and the finest ingredients. Our passionate team is here to make your day better — one bento at a time. 
+        Welcome to Bento Bop! Fresh bento, bold flavors, made with love. Order online for quick delivery or pick up in store. <br />
+
       </p>
       <br />
-      <p className="text-gray-900">Order online for fast delivery or pick up at our shop. Whether you dine with us or enjoy at home, we promise bold flavors and a smile with every bite.</p>
+      <p className="text-gray-900">Great food, happy vibes — that's what we're about.</p>
       <div className="flex justify-between gap-4 mt-4 text-sm text-gray-800">
-        <button >Contact Us</button>
-       <button>See Our Shop</button>
+        <Link href="/contact">
+        <button className="bg-stone-800 hover:bg-stone-700 text-white px-4 py-2 rounded">Contact Us</button>
+        </Link>
+        <Link href="/menu">
+       <button className="bg-stone-800 hover:bg-stone-700 text-white px-4 py-2 rounded">See Our Menu</button>
+       </Link>
       </div>
     </div>
 
