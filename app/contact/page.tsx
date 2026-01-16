@@ -32,18 +32,18 @@ export default function ContactPage() {
     <>
       <Navbar />
 
-      <main className="min-h-screen bg-stone-100 pt-20">
-        <div className="max-w-2xl mx-auto px-4 py-4 md:py-16">
+      <main className="min-h-screen bg-stone-100 pt-4">
+        <div className="max-w-2xl mx-auto px-4 py-4  md:py-16">
 
           {/* Header - moved closer to top */}
           
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl tmd:text-3xl py-8 font-bold text-gray-900">
               Contact Us
             </h1>
           
 
           
-          <div className="text-center mb-10 space-y-1 text-gray-700">
+          <div className="mb-10 space-y-1 text-black text-left">
             <p>Address: 123 Sukhumvit Road, Bangkok, Thailand 10110</p>
             <p>
               Email:{' '}
@@ -73,22 +73,22 @@ export default function ContactPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors"
+                  className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors placeholder:text-gray-500 text-gray-600"
                   placeholder="Name"
                 />
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value})}
-                  className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors"
-                  placeholder="Email 8"
+                  className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors placeholder:text-gray-500 text-gray-600"
+                  placeholder="Email *"
                 />
               </div>
 
               <input type="tel" 
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value})}
-              className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors"
+              className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors placeholder:text-gray-500 text-gray-600"
               placeholder="Phone number" />
 
               <textarea
@@ -96,7 +96,7 @@ export default function ContactPage() {
               rows={5}
               value={formData.comment}
               onChange={(e) => setFormData({ ...formData, comment: e.target.value})}
-              className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors"
+              className="w-full px-4 py-3 bg-transparent border border-gray-400 rounded-sm focus:outline-none focus:border-gray-900 transition-colors placeholder:text-gray-500 text-gray-600"
               placeholder="Comment"
               />
               <button
