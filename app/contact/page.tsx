@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Navbar from '@/Components/Navbar';
-import Footer from '@/Components/Footer';
+
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -30,7 +29,7 @@ export default function ContactPage() {
 
   return (
     <>
-      <Navbar />
+      
 
       <main className="min-h-screen bg-stone-100 pt-4">
         <div className="max-w-2xl mx-auto px-4 py-4  md:py-16">
@@ -113,7 +112,7 @@ export default function ContactPage() {
         </div>
       </main>
 
-      <Footer />
+      
     </>
   );
 }
