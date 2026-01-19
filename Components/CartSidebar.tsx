@@ -1,3 +1,5 @@
+'use client';
+
 import { useCart } from '@/Components/CartContext';
 import Image from 'next/image';
 
