@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useCart } from './CartContext';
+import { useCart } from '@/context/CartContext';
 import { menuItems } from '@/data/menuData';
 
 const navLinks = [
@@ -20,7 +20,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<typeof menuItems>([]);
   const router = useRouter();
-  const { totalItems } = useCart();
+  const { totalItems, openCart } = useCart();
 
   // Function to handle search
   const handleSearch = (query: string) => {
@@ -113,7 +113,9 @@ export default function Navbar() {
             </Link>
 
             {/* Cart */}
-            <button className="p-2 text-gray-600 hover:text-yellow-500 transition-colors relative">
+            <button
+              onClick={openCart}
+              className="p-2 text-gray-600 hover:text-yellow-500 transition-colors relative">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
@@ -138,15 +140,15 @@ export default function Navbar() {
             </button>
 
             {/* Cart */}
-            <button className="p-2 text-gray-600 hover:text-yellow-500 transition-colors relative">
+            <button 
+            onClick={openCart}
+            className="p-2 text-gray-600 hover:text-yellow-500 transition-colors relative">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              {totalItems > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 text-xs font-bold rounded-full flex items-center justify-center">
                 {totalItems}
               </span>
-                )}
             </button>
 
             {/* Menu Toggle */}
@@ -215,7 +217,7 @@ export default function Navbar() {
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Search for bento, drinks, and desserts..."
                 autoFocus
-                className="flex-1 px-4 py-3 rounded-full border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"/>
+                className="flex-1 px-4 py-3 rounded-full border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 text-gray-600"/>
             <button type="submit"
             className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium rounded-full transition-colors">
                 Search
@@ -224,7 +226,7 @@ export default function Navbar() {
 
             {/* Live Search Results Dropdown */}
             {searchResults.length > 0 && (
-              <div className="max-w-2xl mx-auto mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+              <div className="max-w-2xl mx-auto mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidde">
                 {searchResults.slice(0, 5).map(item => (
                   <Link
                     key={item.id}
@@ -249,7 +251,7 @@ export default function Navbar() {
 
             {/* No Results Message */}
             {searchQuery.trim() !== '' && searchResults.length === 0 && (
-              <div className="max-w-2xl mx-auto mt-2 p-4 text-center text-gray-500">
+              <div className="max-w-2xl mx-auto mt-2 p-4 text-center text-gray-900">
                 No items found for "{searchQuery}"
               </div>
             )}
