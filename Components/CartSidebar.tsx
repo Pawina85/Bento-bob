@@ -25,7 +25,7 @@ export default function CartSidebar() {
         onClick={closeCart}
         />
 
-        <div className="fixed right-0 h-full max-w-md bg-white shadow-xl z-50 flex flex-col">
+        <div className="fixed right-0 top-0 w-full h-full max-w-md bg-white shadow-xl z-50 flex flex-col">
 
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
                 <h2 className="text-xl font-bold text-gray-900">Your Cart ({totalItems})</h2>
