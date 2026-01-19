@@ -215,7 +215,7 @@ export default function Navbar() {
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Search for bento, drinks, and desserts..."
                 autoFocus
-                className="flex-1 px-4 py-3 rounded-full border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"/>
+                className="flex-1 px-4 py-3 rounded-full border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 text-gray-600"/>
             <button type="submit"
             className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium rounded-full transition-colors">
                 Search
@@ -224,7 +224,7 @@ export default function Navbar() {
 
             {/* Live Search Results Dropdown */}
             {searchResults.length > 0 && (
-              <div className="max-w-2xl mx-auto mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+              <div className="max-w-2xl mx-auto mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidde">
                 {searchResults.slice(0, 5).map(item => (
                   <Link
                     key={item.id}
@@ -249,7 +249,7 @@ export default function Navbar() {
 
             {/* No Results Message */}
             {searchQuery.trim() !== '' && searchResults.length === 0 && (
-              <div className="max-w-2xl mx-auto mt-2 p-4 text-center text-gray-500">
+              <div className="max-w-2xl mx-auto mt-2 p-4 text-center text-gray-900">
                 No items found for "{searchQuery}"
               </div>
             )}
