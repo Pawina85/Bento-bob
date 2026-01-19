@@ -20,9 +20,8 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<typeof menuItems>([]);
   const router = useRouter();
-  const { totalItems, openCart } = useCart();
+  const { totalItems } = useCart();
 
-  // Function to handle search
   const handleSearch = (query: string) => {
     setSearchQuery(query);
 
@@ -31,7 +30,6 @@ export default function Navbar() {
       return;
     }
 
-    // Filter menu items that match the search query
     const filtered = menuItems.filter(item =>
       item.name.toLowerCase().includes(query.toLowerCase()) ||
       item.description.toLowerCase().includes(query.toLowerCase()) ||
@@ -41,7 +39,6 @@ export default function Navbar() {
     setSearchResults(filtered);
   };
 
-  // Function to handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -70,25 +67,14 @@ export default function Navbar() {
           {/* Desktop Nav Links */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              link.href.startsWith('/') ? (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="text-gray-600 hover:text-yellow-500 font-medium transition-colors relative group"
-                >
-                  {link.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300" />
-                </Link>
-              ) : (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="text-gray-600 hover:text-yellow-500 font-medium transition-colors relative group"
-                >
-                  {link.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300" />
-                </a>
-              )
+              <Link
+                key={link.name}
+                href={link.href}
+                className="text-gray-600 hover:text-yellow-500 font-medium transition-colors relative group"
+              >
+                {link.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300" />
+              </Link>
             ))}
           </div>
 
@@ -96,8 +82,9 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {/* Search */}
             <button 
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className={`p-2 transition-colors ${isSearchOpen ? 'text-yellow-500' : 'text-gray-600 hover:text-yellow-500 '}`}>
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className={`p-2 transition-colors ${isSearchOpen ? 'text-yellow-500' : 'text-gray-600 hover:text-yellow-500'}`}
+            >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -105,26 +92,28 @@ export default function Navbar() {
 
             {/* Login */}
             <Link
-            href="/login"
-            className="p-2 text-gray-600 hover:text-yellow-500 transition-colors">
+              href="/login"
+              className="p-2 text-gray-600 hover:text-yellow-500 transition-colors"
+            >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </Link>
 
             {/* Cart */}
-            <button
-              onClick={openCart}
-              className="p-2 text-gray-600 hover:text-yellow-500 transition-colors relative">
+            <Link
+              href="/cart"
+              className="p-2 text-gray-600 hover:text-yellow-500 transition-colors relative"
+            >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 text-xs font-bold rounded-full flex items-center justify-center">
-                {totalItems}
-              </span>
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 text-xs font-bold rounded-full flex items-center justify-center text-gray-900">
+                  {totalItems}
+                </span>
               )}
-            </button>
+            </Link>
           </div>
 
           {/* Right Icons - Mobile */}
@@ -140,16 +129,19 @@ export default function Navbar() {
             </button>
 
             {/* Cart */}
-            <button 
-            onClick={openCart}
-            className="p-2 text-gray-600 hover:text-yellow-500 transition-colors relative">
+            <Link
+              href="/cart"
+              className="p-2 text-gray-600 hover:text-yellow-500 transition-colors relative"
+            >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 text-xs font-bold rounded-full flex items-center justify-center">
-                {totalItems}
-              </span>
-            </button>
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 text-xs font-bold rounded-full flex items-center justify-center text-gray-900">
+                  {totalItems}
+                </span>
+              )}
+            </Link>
 
             {/* Menu Toggle */}
             <button
@@ -173,25 +165,14 @@ export default function Navbar() {
           <div className="md:hidden py-4 border-t border-gray-100">
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => (
-                link.href.startsWith('/') ? (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className="text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 font-medium px-4 py-3 rounded-lg transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                ) : (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    className="text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 font-medium px-4 py-3 rounded-lg transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {link.name}
-                  </a>
-                )
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 font-medium px-4 py-3 rounded-lg transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
               ))}
 
               {/* Login in Mobile Menu */}
@@ -208,25 +189,30 @@ export default function Navbar() {
             </div>
           </div>
         )}
+
+        {/* Search Bar */}
         {isSearchOpen && (
-        <div className="border-t border-gray-100 p-4">
+          <div className="border-t border-gray-100 p-4">
             <form className="max-w-2xl mx-auto flex gap-2" onSubmit={handleSubmit}>
-                <input
+              <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Search for bento, drinks, and desserts..."
                 autoFocus
-                className="flex-1 px-4 py-3 rounded-full border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 text-gray-600"/>
-            <button type="submit"
-            className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium rounded-full transition-colors">
+                className="flex-1 px-4 py-3 rounded-full border border-gray-200 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 text-gray-900 placeholder:text-gray-500"
+              />
+              <button
+                type="submit"
+                className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium rounded-full transition-colors"
+              >
                 Search
-            </button>
+              </button>
             </form>
 
             {/* Live Search Results Dropdown */}
             {searchResults.length > 0 && (
-              <div className="max-w-2xl mx-auto mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidde">
+              <div className="max-w-2xl mx-auto mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
                 {searchResults.slice(0, 5).map(item => (
                   <Link
                     key={item.id}
@@ -238,7 +224,13 @@ export default function Navbar() {
                       setSearchResults([]);
                     }}
                   >
-                    <Image src={item.image} alt={item.name} width={48} height={48} className="w-12 h-12 rounded-lg object-cover" />
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 rounded-lg object-cover"
+                    />
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{item.name}</p>
                       <p className="text-sm text-gray-500">{item.description}</p>
@@ -251,11 +243,11 @@ export default function Navbar() {
 
             {/* No Results Message */}
             {searchQuery.trim() !== '' && searchResults.length === 0 && (
-              <div className="max-w-2xl mx-auto mt-2 p-4 text-center text-gray-900">
-                No items found for "{searchQuery}"
+              <div className="max-w-2xl mx-auto mt-2 p-4 text-center text-gray-500">
+                No items found for &quot;{searchQuery}&quot;
               </div>
             )}
-        </div>
+          </div>
         )}
       </nav>
     </header>

@@ -105,7 +105,7 @@ export default function MenuSection() {
     >
       -
     </button>
-    <span className="w-6 text-center font-semibold text-gray-900">
+    <span className="w-6 text-center font-bold text-gray-900">
       {getQuantity(item.id)}
     </span>
     <button
