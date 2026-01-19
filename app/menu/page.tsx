@@ -74,7 +74,7 @@ export default function MenuPage() {
                                     items-center justify-center text-gray-600 font-bold transition-colors" >
                                         -
                                 </button>
-                                <span className="w-6 text-center font-semibold">
+                                <span className="w-6 text-center font-bold text-gray-900">
                                     {quantities[item.id] || 0}
                                 </span>
                                 <button
