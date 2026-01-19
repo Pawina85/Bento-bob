@@ -1,6 +1,6 @@
 'use client';
 
-import { useCart } from '@/Components/CartContext';
+import { useCart } from '../context/CartContext';
 import Image from 'next/image';
 
 export default function CartSidebar() {
@@ -50,7 +50,7 @@ export default function CartSidebar() {
                         {items.map((item) => (
                             <div key={item.id} className="flex gap-4 bg-gray-50 rounded-xl p-3">
 
-                                <div className="w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
+                                <div className="w-20 h-20 relative rounded-lg overflow-hidden shrink-0">
                                     <Image
                                     src={item.image}
                                     alt={item.name}
