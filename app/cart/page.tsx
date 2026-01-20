@@ -27,11 +27,11 @@ const PICKUP_LOCATIONS = [
 const DELIVERY_FEE = 2.0;
 
 export default function CartPage() {
-  const { items, updateQuantity, removeItem, totalPrice } = useCart();
+  const { items, updateQuantity, removeItem, totalPrice, updateDeliveryInfo } = useCart();
   const [deliveryOption, setDeliveryOption] = useState<'pickup' | 'delivery' | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-
-  const { updateDeliveryInfo } = useCart();
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const canCheckout = deliveryOption === 'delivery' || (deliveryOption === 'pickup' && selectedLocation);
   const finalTotal = deliveryOption === 'delivery' ? totalPrice + DELIVERY_FEE : totalPrice;
