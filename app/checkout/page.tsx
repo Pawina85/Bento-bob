@@ -9,6 +9,7 @@ import Footer from '@/Components/Footer';
 import { useCart } from '@/context/CartContext';
 import Input from '@/Components/ui/Input';
 import CheckoutSection from '@/Components/ui/CheckoutSection';
+import { useSearchParams } from 'next/navigation';
 
 // Constants
 const DELIVERY_FEE = 50;
@@ -83,6 +84,10 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const searchParams = useSearchParams();
+  const selectedDate = searchParams.get('date');
+  const selectedTime = searchParams.get('time');
+  const deliveryOption = searchParams.get('type');
 
   const [formData, setFormData] = useState({
     email: '',
@@ -396,6 +401,28 @@ export default function CheckoutPage() {
                 </div>
               </CheckoutSection>
             )}
+
+            {hasStartedCheckout && (
+              <CheckoutSection title="Delivery Time">
+                <div className="p-4 border-2 border-gray-400 rounded-xl bg-yellow-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">📅</span>
+                      <div>
+                        <p className="font-semibold text-gray-900">{deliveryOption === 'pickup' ? 'Store Pickup' : 'Delivery'}</p>
+                        <p className="text-gray-600 text-sm">{selectedDate} at {selectedTime}</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/cart"
+                    className="text-sm text-yellow-600 hover:underline">
+                    Change
+                    </Link>
+                    </div>
+                </div>
+              </CheckoutSection>
+            )}
+
 
             {/* Delivery */}
             {hasStartedCheckout && (
