@@ -19,6 +19,34 @@ const VALID_PROMO_CODES: Record<string, number> = {
   BENTO50: 50,
 };
 
+const PICKUP_LOCATIONS: Record<string, { name: string; address: string }> = {
+  sukhumvit: { name: 'Bento Bop Sukhumvit', address: '123 Sukhumvit Road, Soi 23, Bangkok' },
+  siam: { name: 'Bento Bop Siam', address: '456 Rama 1 Road, Bangkok' },
+};
+
+// Format date for display
+const formatDateForDisplay = (dateStr: string | null): string => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (date.toDateString() === today.toDateString()) return 'Today';
+  if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+};
+
+// Format time for display
+const formatTimeForDisplay = (timeStr: string | null): string => {
+  if (!timeStr) return '';
+  const [hours, minutes] = timeStr.split(':');
+  const hour = parseInt(hours, 10);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minutes} ${ampm}`;
+};
+
 type PaymentMethod = 'card' | 'promptpay' | null;
 
 interface FormErrors {
@@ -81,6 +109,8 @@ export default function CheckoutPage() {
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [appliedPromoCode, setAppliedPromoCode] = useState('');
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [promoError, setPromoError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -88,6 +118,7 @@ export default function CheckoutPage() {
   const selectedDate = searchParams.get('date');
   const selectedTime = searchParams.get('time');
   const deliveryOption = searchParams.get('type');
+  const selectedLocation = searchParams.get('location');
 
   const [formData, setFormData] = useState({
     email: '',
@@ -100,16 +131,48 @@ export default function CheckoutPage() {
     cardNumber: '',
     cardExpiry: '',
     cardCvc: '',
-    notes:
+    notes: '',
   });
 
   // Calculations
   const discount = promoApplied ? VALID_PROMO_CODES[appliedPromoCode] || 0 : 0;
   const finalTotal = totalPrice + DELIVERY_FEE - discount;
 
+  // Format card number with spaces every 4 digits
+  const formatCardNumber = (value: string): string => {
+    const cleaned = value.replace(/\D/g, '');
+    const chunks = cleaned.match(/.{1,4}/g) || [];
+    return chunks.join(' ').substring(0, 19); // 16 digits + 3 spaces
+  };
+
+  // Format expiry as MM/YY
+  const formatExpiry = (value: string): string => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length >= 2) {
+      return `${cleaned.substring(0, 2)}/${cleaned.substring(2, 4)}`;
+    }
+    return cleaned;
+  };
+
+  // Format CVC (only digits, max 4)
+  const formatCvc = (value: string): string => {
+    return value.replace(/\D/g, '').substring(0, 4);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    let formattedValue = value;
+
+    // Apply formatting for card fields
+    if (name === 'cardNumber') {
+      formattedValue = formatCardNumber(value);
+    } else if (name === 'cardExpiry') {
+      formattedValue = formatExpiry(value);
+    } else if (name === 'cardCvc') {
+      formattedValue = formatCvc(value);
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: formattedValue }));
 
     // Clear error when user starts typing
     if (errors[name as keyof FormErrors]) {
@@ -195,12 +258,28 @@ export default function CheckoutPage() {
     return !Object.values(newErrors).some(Boolean);
   };
 
-  const handleApplyPromo = () => {
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) {
+      setPromoError('Please enter a promo code');
+      return;
+    }
+
+    setIsApplyingPromo(true);
+    setPromoError('');
+
+    // Simulate API call to validate promo code
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
     const code = promoCode.toUpperCase();
     if (VALID_PROMO_CODES[code]) {
       setPromoApplied(true);
       setAppliedPromoCode(code);
+      setPromoError('');
+    } else {
+      setPromoError('Invalid promo code');
     }
+
+    setIsApplyingPromo(false);
   };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -404,22 +483,37 @@ export default function CheckoutPage() {
             )}
 
             {hasStartedCheckout && (
-              <CheckoutSection title="Delivery Time">
-                <div className="p-4 border-2 border-gray-400 rounded-xl bg-yellow-50">
+              <CheckoutSection title={deliveryOption === 'pickup' ? 'Pickup Details' : 'Delivery Time'}>
+                <div className="p-4 border-2 border-yellow-400 rounded-xl bg-yellow-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">📅</span>
+                      <span className="text-2xl">{deliveryOption === 'pickup' ? '🏪' : '📅'}</span>
                       <div>
-                        <p className="font-semibold text-gray-900">{deliveryOption === 'pickup' ? 'Store Pickup' : 'Delivery'}</p>
-                        <p className="text-gray-600 text-sm">{selectedDate} at {selectedTime}</p>
+                        <p className="font-semibold text-gray-900">
+                          {deliveryOption === 'pickup' ? 'Store Pickup' : 'Delivery'}
+                        </p>
+                        <p className="text-gray-600 text-sm">
+                          {formatDateForDisplay(selectedDate)} at {formatTimeForDisplay(selectedTime)}
+                        </p>
+                        {deliveryOption === 'pickup' && selectedLocation && PICKUP_LOCATIONS[selectedLocation] && (
+                          <div className="mt-2 pt-2 border-t border-yellow-200">
+                            <p className="text-gray-900 text-sm font-medium">
+                              {PICKUP_LOCATIONS[selectedLocation].name}
+                            </p>
+                            <p className="text-gray-500 text-xs">
+                              {PICKUP_LOCATIONS[selectedLocation].address}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <Link
-                    href="/cart"
-                    className="text-sm text-yellow-600 hover:underline">
-                    Change
+                    <Link
+                      href="/cart"
+                      className="text-sm text-yellow-600 hover:underline"
+                    >
+                      Change
                     </Link>
-                    </div>
+                  </div>
                 </div>
               </CheckoutSection>
             )}
@@ -595,25 +689,50 @@ export default function CheckoutPage() {
                     </span>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
-                    <label htmlFor="promoCode" className="sr-only">
-                      Promo code
-                    </label>
-                    <input
-                      id="promoCode"
-                      type="text"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-400 text-gray-900 placeholder:text-gray-400"
-                      placeholder="Enter promo code"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleApplyPromo}
-                      className="px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
-                    >
-                      Apply
-                    </button>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <label htmlFor="promoCode" className="sr-only">
+                        Promo code
+                      </label>
+                      <input
+                        id="promoCode"
+                        type="text"
+                        value={promoCode}
+                        onChange={(e) => {
+                          setPromoCode(e.target.value);
+                          setPromoError('');
+                        }}
+                        disabled={isApplyingPromo}
+                        className={`flex-1 px-4 py-3 border rounded-lg focus:outline-none focus:border-yellow-400 text-gray-900 placeholder:text-gray-400 ${
+                          promoError ? 'border-red-300' : 'border-gray-200'
+                        } ${isApplyingPromo ? 'bg-gray-100' : ''}`}
+                        placeholder="Enter promo code"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyPromo}
+                        disabled={isApplyingPromo}
+                        className={`px-6 py-3 font-medium rounded-lg transition-colors min-w-[100px] ${
+                          isApplyingPromo
+                            ? 'bg-gray-400 text-white cursor-not-allowed'
+                            : 'bg-gray-900 text-white hover:bg-gray-800'
+                        }`}
+                      >
+                        {isApplyingPromo ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                          </span>
+                        ) : (
+                          'Apply'
+                        )}
+                      </button>
+                    </div>
+                    {promoError && (
+                      <p className="text-red-500 text-sm">{promoError}</p>
+                    )}
                   </div>
                 )}
               </CheckoutSection>

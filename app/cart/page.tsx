@@ -26,6 +26,36 @@ const PICKUP_LOCATIONS = [
 
 const DELIVERY_FEE = 2.0;
 
+// Generate available dates (next 7 days)
+const generateAvailableDates = () => {
+  const dates = [];
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    dates.push({
+      value: date.toISOString().split('T')[0],
+      label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+    });
+  }
+  return dates;
+};
+
+// Generate available time slots
+const TIME_SLOTS = [
+  { value: '10:00', label: '10:00 AM' },
+  { value: '11:00', label: '11:00 AM' },
+  { value: '12:00', label: '12:00 PM' },
+  { value: '13:00', label: '1:00 PM' },
+  { value: '14:00', label: '2:00 PM' },
+  { value: '15:00', label: '3:00 PM' },
+  { value: '16:00', label: '4:00 PM' },
+  { value: '17:00', label: '5:00 PM' },
+  { value: '18:00', label: '6:00 PM' },
+  { value: '19:00', label: '7:00 PM' },
+  { value: '20:00', label: '8:00 PM' },
+];
+
 export default function CartPage() {
   const { items, updateQuantity, removeItem, totalPrice, updateDeliveryInfo } = useCart();
   const [deliveryOption, setDeliveryOption] = useState<'pickup' | 'delivery' | null>(null);
@@ -33,7 +63,9 @@ export default function CartPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
-  const canCheckout = deliveryOption === 'delivery' || (deliveryOption === 'pickup' && selectedLocation);
+  const availableDates = generateAvailableDates();
+  const hasSelectedDateTime = selectedDate && selectedTime;
+  const canCheckout = hasSelectedDateTime && (deliveryOption === 'delivery' || (deliveryOption === 'pickup' && selectedLocation));
   const finalTotal = deliveryOption === 'delivery' ? totalPrice + DELIVERY_FEE : totalPrice;
 
   return (
@@ -230,6 +262,72 @@ export default function CartPage() {
                     Free delivery on orders over $30
                   </p>
                 )}
+
+                {/* Date & Time Selection */}
+                {deliveryOption && (
+                  <div className="mt-6 max-w-md mx-auto">
+                    <p className="text-sm text-gray-600 mb-3">
+                      Select {deliveryOption === 'pickup' ? 'pickup' : 'delivery'} date & time:
+                    </p>
+
+                    {/* Date Selection */}
+                    <div className="mb-4">
+                      <label className="block text-xs text-gray-500 mb-2 uppercase tracking-wide">Date</label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {availableDates.slice(0, 4).map((date) => (
+                          <button
+                            key={date.value}
+                            onClick={() => setSelectedDate(date.value)}
+                            className={`p-2 rounded-lg border-2 text-center transition-all text-sm ${
+                              selectedDate === date.value
+                                ? 'border-yellow-400 bg-yellow-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white'
+                            }`}
+                          >
+                            {date.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 mt-2">
+                        {availableDates.slice(4).map((date) => (
+                          <button
+                            key={date.value}
+                            onClick={() => setSelectedDate(date.value)}
+                            className={`p-2 rounded-lg border-2 text-center transition-all text-sm ${
+                              selectedDate === date.value
+                                ? 'border-yellow-400 bg-yellow-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white'
+                            }`}
+                          >
+                            {date.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Time Selection */}
+                    {selectedDate && (
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-2 uppercase tracking-wide">Time</label>
+                        <div className="grid grid-cols-4 gap-2">
+                          {TIME_SLOTS.map((time) => (
+                            <button
+                              key={time.value}
+                              onClick={() => setSelectedTime(time.value)}
+                              className={`p-2 rounded-lg border-2 text-center transition-all text-sm ${
+                                selectedTime === time.value
+                                  ? 'border-yellow-400 bg-yellow-50'
+                                  : 'border-gray-200 hover:border-gray-300 bg-white'
+                              }`}
+                            >
+                              {time.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Order Summary */}
@@ -255,28 +353,31 @@ export default function CartPage() {
               {/* Checkout */}
               <div className="flex flex-col items-end gap-2 pt-4">
                 <Link
-                href="/checkout"
-                onClick={() => {
-                  updateDeliveryInfo({
-                    type: deliveryOption,
-                    location: selectedLocation,
-                    date: selectedDate,
-                    time: selectedTime,
-                  })
-                }}
-                className={`px-8 py-4 rounded-full font-bold transition-all ${
-    canCheckout
-      ? 'bg-yellow-400 hover:bg-yellow-500 text-gray-900 hover:scale-105'
-      : 'bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none'
-  }`}
->
-  Checkout
-</Link>
+                  href={`/checkout?type=${deliveryOption}&date=${selectedDate}&time=${selectedTime}${selectedLocation ? `&location=${selectedLocation}` : ''}`}
+                  onClick={() => {
+                    updateDeliveryInfo({
+                      type: deliveryOption,
+                      location: selectedLocation,
+                      date: selectedDate,
+                      time: selectedTime,
+                    });
+                  }}
+                  className={`px-8 py-4 rounded-full font-bold transition-all ${
+                    canCheckout
+                      ? 'bg-yellow-400 hover:bg-yellow-500 text-gray-900 hover:scale-105'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none'
+                  }`}
+                >
+                  Checkout
+                </Link>
                 {!deliveryOption && (
                   <p className="text-xs text-gray-500">Please select a delivery method</p>
                 )}
                 {deliveryOption === 'pickup' && !selectedLocation && (
                   <p className="text-xs text-gray-500">Please select a pickup location</p>
+                )}
+                {deliveryOption && !hasSelectedDateTime && (
+                  <p className="text-xs text-gray-500">Please select date and time</p>
                 )}
               </div>
             </>
