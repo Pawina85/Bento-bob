@@ -100,6 +100,7 @@ export default function CheckoutPage() {
     cardNumber: '',
     cardExpiry: '',
     cardCvc: '',
+    notes:
   });
 
   // Calculations
@@ -423,7 +424,6 @@ export default function CheckoutPage() {
               </CheckoutSection>
             )}
 
-
             {/* Delivery */}
             {hasStartedCheckout && (
               <CheckoutSection title="Delivery">
@@ -553,6 +553,20 @@ export default function CheckoutPage() {
                 </div>
               </CheckoutSection>
             )}
+
+              {hasStartedCheckout && (
+              <CheckoutSection title="Order Notes (Optional)">  
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-400 text-gray-900 placeholder:text-gray-400 resize-none"
+                placeholder="Add any special instructions or requests for your order"
+              />
+              </CheckoutSection>
+            )
+              }
 
             {/* Promo Code */}
             {hasStartedCheckout && (
