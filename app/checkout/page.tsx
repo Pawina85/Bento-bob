@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -99,7 +99,7 @@ const validateCvc = (cvc: string): string | undefined => {
   return undefined;
 };
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const { items, totalPrice } = useCart();
 
@@ -833,5 +833,33 @@ export default function CheckoutPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+// Loading fallback for Suspense
+function CheckoutLoading() {
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-gray-50 pt-4">
+        <div className="max-w-2xl mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+            <div className="h-48 bg-gray-200 rounded-2xl"></div>
+            <div className="h-48 bg-gray-200 rounded-2xl"></div>
+            <div className="h-48 bg-gray-200 rounded-2xl"></div>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<CheckoutLoading />}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
