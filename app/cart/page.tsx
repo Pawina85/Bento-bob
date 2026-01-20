@@ -31,6 +31,8 @@ export default function CartPage() {
   const [deliveryOption, setDeliveryOption] = useState<'pickup' | 'delivery' | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
+  const { updateDeliveryInfo } = useCart();
+
   const canCheckout = deliveryOption === 'delivery' || (deliveryOption === 'pickup' && selectedLocation);
   const finalTotal = deliveryOption === 'delivery' ? totalPrice + DELIVERY_FEE : totalPrice;
 
@@ -254,6 +256,14 @@ export default function CartPage() {
               <div className="flex flex-col items-end gap-2 pt-4">
                 <Link
                 href="/checkout"
+                onClick={() => {
+                  updateDeliveryInfo({
+                    type: deliveryOption,
+                    location: selectedLocation,
+                    date: selectedDate,
+                    time: selectedTime,
+                  })
+                }}
                 className={`px-8 py-4 rounded-full font-bold transition-all ${
     canCheckout
       ? 'bg-yellow-400 hover:bg-yellow-500 text-gray-900 hover:scale-105'
