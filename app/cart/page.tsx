@@ -252,16 +252,16 @@ export default function CartPage() {
 
               {/* Checkout */}
               <div className="flex flex-col items-end gap-2 pt-4">
-                <button
-                  disabled={!canCheckout}
-                  className={`w-full md:w-auto px-8 py-3 rounded-full font-medium transition-all ${
-                    canCheckout
-                      ? 'bg-yellow-400 hover:bg-yellow-500 text-gray-900'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  Proceed to Checkout
-                </button>
+                <Link
+                href="/checkout"
+                className={`px-8 py-4 rounded-full font-bold transition-all ${
+    canCheckout
+      ? 'bg-yellow-400 hover:bg-yellow-500 text-gray-900 hover:scale-105'
+      : 'bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none'
+  }`}
+>
+  Checkout
+</Link>
                 {!deliveryOption && (
                   <p className="text-xs text-gray-500">Please select a delivery method</p>
                 )}
