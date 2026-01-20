@@ -111,6 +111,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setCurrentOrder(null);
     };
 
+    const [deliveryInfo, setDeliveryInfo] = useState<{
+        type: 'pickup' | 'delivery' | null;
+        location: string | null;
+        date: string | null;
+        time: string | null;
+    }>({
+        type: null,
+        location: null,
+        date: null,
+        time: null,
+    });
+
+    const updateDeliveryInfo = (info: Partial<typeof deliveryInfo>) => {
+        setDeliveryInfo((prev) => ({ ...prev, ...info }));
+    }
+
     return (
         <CartContext.Provider
             value={{
