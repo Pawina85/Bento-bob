@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -9,6 +9,7 @@ import Footer from '@/Components/Footer';
 import { useCart } from '@/context/CartContext';
 import Input from '@/Components/ui/Input';
 import CheckoutSection from '@/Components/ui/CheckoutSection';
+import { useSearchParams } from 'next/navigation';
 
 // Constants
 const DELIVERY_FEE = 50;
@@ -16,6 +17,34 @@ const CURRENCY = '฿';
 const VALID_PROMO_CODES: Record<string, number> = {
   BENTO20: 20,
   BENTO50: 50,
+};
+
+const PICKUP_LOCATIONS: Record<string, { name: string; address: string }> = {
+  sukhumvit: { name: 'Bento Bop Sukhumvit', address: '123 Sukhumvit Road, Soi 23, Bangkok' },
+  siam: { name: 'Bento Bop Siam', address: '456 Rama 1 Road, Bangkok' },
+};
+
+// Format date for display
+const formatDateForDisplay = (dateStr: string | null): string => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (date.toDateString() === today.toDateString()) return 'Today';
+  if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+};
+
+// Format time for display
+const formatTimeForDisplay = (timeStr: string | null): string => {
+  if (!timeStr) return '';
+  const [hours, minutes] = timeStr.split(':');
+  const hour = parseInt(hours, 10);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minutes} ${ampm}`;
 };
 
 type PaymentMethod = 'card' | 'promptpay' | null;
@@ -70,7 +99,7 @@ const validateCvc = (cvc: string): string | undefined => {
   return undefined;
 };
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const { items, totalPrice } = useCart();
 
@@ -80,9 +109,16 @@ export default function CheckoutPage() {
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [appliedPromoCode, setAppliedPromoCode] = useState('');
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [promoError, setPromoError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const searchParams = useSearchParams();
+  const selectedDate = searchParams.get('date');
+  const selectedTime = searchParams.get('time');
+  const deliveryOption = searchParams.get('type');
+  const selectedLocation = searchParams.get('location');
 
   const [formData, setFormData] = useState({
     email: '',
@@ -95,15 +131,48 @@ export default function CheckoutPage() {
     cardNumber: '',
     cardExpiry: '',
     cardCvc: '',
+    notes: '',
   });
 
   // Calculations
   const discount = promoApplied ? VALID_PROMO_CODES[appliedPromoCode] || 0 : 0;
   const finalTotal = totalPrice + DELIVERY_FEE - discount;
 
+  // Format card number with spaces every 4 digits
+  const formatCardNumber = (value: string): string => {
+    const cleaned = value.replace(/\D/g, '');
+    const chunks = cleaned.match(/.{1,4}/g) || [];
+    return chunks.join(' ').substring(0, 19); // 16 digits + 3 spaces
+  };
+
+  // Format expiry as MM/YY
+  const formatExpiry = (value: string): string => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length >= 2) {
+      return `${cleaned.substring(0, 2)}/${cleaned.substring(2, 4)}`;
+    }
+    return cleaned;
+  };
+
+  // Format CVC (only digits, max 4)
+  const formatCvc = (value: string): string => {
+    return value.replace(/\D/g, '').substring(0, 4);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    let formattedValue = value;
+
+    // Apply formatting for card fields
+    if (name === 'cardNumber') {
+      formattedValue = formatCardNumber(value);
+    } else if (name === 'cardExpiry') {
+      formattedValue = formatExpiry(value);
+    } else if (name === 'cardCvc') {
+      formattedValue = formatCvc(value);
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: formattedValue }));
 
     // Clear error when user starts typing
     if (errors[name as keyof FormErrors]) {
@@ -189,12 +258,28 @@ export default function CheckoutPage() {
     return !Object.values(newErrors).some(Boolean);
   };
 
-  const handleApplyPromo = () => {
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) {
+      setPromoError('Please enter a promo code');
+      return;
+    }
+
+    setIsApplyingPromo(true);
+    setPromoError('');
+
+    // Simulate API call to validate promo code
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
     const code = promoCode.toUpperCase();
     if (VALID_PROMO_CODES[code]) {
       setPromoApplied(true);
       setAppliedPromoCode(code);
+      setPromoError('');
+    } else {
+      setPromoError('Invalid promo code');
     }
+
+    setIsApplyingPromo(false);
   };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -220,9 +305,11 @@ export default function CheckoutPage() {
         <Navbar />
         <main className="min-h-screen bg-gray-50 pt-4">
           <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-            <span className="text-6xl mb-4 block" role="img" aria-label="Shopping cart">
-              🛒
-            </span>
+            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h1>
             <p className="text-gray-500 mb-6">Add some items before checkout</p>
             <Link
@@ -255,8 +342,8 @@ export default function CheckoutPage() {
           </div>
 
           <form onSubmit={handlePlaceOrder} className="space-y-8" noValidate>
-            {/* Section 1: Account */}
-            <CheckoutSection number={1} title="Account">
+            {/* Account */}
+            <CheckoutSection title="Account">
               {!hasStartedCheckout ? (
                 <div className="space-y-4">
                   <p className="text-gray-600 text-sm">
@@ -300,9 +387,9 @@ export default function CheckoutPage() {
               )}
             </CheckoutSection>
 
-            {/* Section 2: Contact */}
+            {/* Contact */}
             {hasStartedCheckout && (
-              <CheckoutSection number={2} title="Contact">
+              <CheckoutSection title="Contact">
                 <div className="space-y-4">
                   <Input
                     type="email"
@@ -330,9 +417,9 @@ export default function CheckoutPage() {
               </CheckoutSection>
             )}
 
-            {/* Section 3: Delivery Address */}
+            {/* Delivery Address */}
             {hasStartedCheckout && (
-              <CheckoutSection number={3} title="Delivery Address">
+              <CheckoutSection title="Delivery Address">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <Input
@@ -397,21 +484,69 @@ export default function CheckoutPage() {
               </CheckoutSection>
             )}
 
-            {/* Section 4: Delivery Time */}
             {hasStartedCheckout && (
-              <CheckoutSection number={4} title="Delivery Time">
-                <div className="p-4 border-2 border-yellow-400 bg-yellow-50 rounded-xl">
+              <CheckoutSection title={deliveryOption === 'pickup' ? 'Pickup Details' : 'Delivery Time'}>
+                <div className="p-4 border-2 border-yellow-400 rounded-xl bg-yellow-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl" role="img" aria-label="Delivery truck">
-                        🚚
-                      </span>
+                      <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                        {deliveryOption === 'pickup' ? (
+                          <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        )}
+                      </div>
                       <div>
-                        <p className="font-semibold text-gray-900">Same-Day Delivery</p>
+                        <p className="font-semibold text-gray-900">
+                          {deliveryOption === 'pickup' ? 'Store Pickup' : 'Delivery'}
+                        </p>
+                        <p className="text-gray-600 text-sm">
+                          {formatDateForDisplay(selectedDate)} at {formatTimeForDisplay(selectedTime)}
+                        </p>
+                        {deliveryOption === 'pickup' && selectedLocation && PICKUP_LOCATIONS[selectedLocation] && (
+                          <div className="mt-2 pt-2 border-t border-yellow-200">
+                            <p className="text-gray-900 text-sm font-medium">
+                              {PICKUP_LOCATIONS[selectedLocation].name}
+                            </p>
+                            <p className="text-gray-500 text-xs">
+                              {PICKUP_LOCATIONS[selectedLocation].address}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <Link
+                      href="/cart"
+                      className="text-sm text-yellow-600 hover:underline"
+                    >
+                      Change
+                    </Link>
+                  </div>
+                </div>
+              </CheckoutSection>
+            )}
+
+            {/* Delivery */}
+            {hasStartedCheckout && (
+              <CheckoutSection title="Delivery">
+                <div className="p-4 border border-gray-200 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Same-Day Delivery</p>
                         <p className="text-gray-500 text-sm">Delivered within 2-4 hours</p>
                       </div>
                     </div>
-                    <span className="font-bold text-gray-900">
+                    <span className="font-semibold text-gray-900">
                       {CURRENCY}{DELIVERY_FEE}
                     </span>
                   </div>
@@ -419,9 +554,9 @@ export default function CheckoutPage() {
               </CheckoutSection>
             )}
 
-            {/* Section 5: Payment */}
+            {/* Payment */}
             {hasStartedCheckout && (
-              <CheckoutSection number={5} title="Payment">
+              <CheckoutSection title="Payment">
                 <div className="space-y-3" role="radiogroup" aria-label="Payment method">
                   {/* Credit/Debit Card */}
                   <button
@@ -436,9 +571,13 @@ export default function CheckoutPage() {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl" role="img" aria-label="Credit card">
-                        💳
-                      </span>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        paymentMethod === 'card' ? 'bg-yellow-100' : 'bg-gray-100'
+                      }`}>
+                        <svg className={`w-5 h-5 ${paymentMethod === 'card' ? 'text-yellow-600' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                      </div>
                       <div>
                         <p className="font-semibold text-gray-900">Credit / Debit Card</p>
                         <p className="text-gray-500 text-sm">Visa, Mastercard, JCB</p>
@@ -500,9 +639,13 @@ export default function CheckoutPage() {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl" role="img" aria-label="Mobile phone">
-                        📱
-                      </span>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        paymentMethod === 'promptpay' ? 'bg-yellow-100' : 'bg-gray-100'
+                      }`}>
+                        <svg className={`w-5 h-5 ${paymentMethod === 'promptpay' ? 'text-yellow-600' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                      </div>
                       <div>
                         <p className="font-semibold text-gray-900">
                           PromptPay / Mobile Banking
@@ -527,9 +670,23 @@ export default function CheckoutPage() {
               </CheckoutSection>
             )}
 
-            {/* Section 6: Promo Code */}
+              {hasStartedCheckout && (
+              <CheckoutSection title="Order Notes (Optional)">  
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-400 text-gray-900 placeholder:text-gray-400 resize-none"
+                placeholder="Add any special instructions or requests for your order"
+              />
+              </CheckoutSection>
+            )
+              }
+
+            {/* Promo Code */}
             {hasStartedCheckout && (
-              <CheckoutSection number={6} title="Promo Code">
+              <CheckoutSection title="Promo Code">
                 {promoApplied ? (
                   <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-xl">
                     <div className="flex items-center gap-2 text-green-700">
@@ -554,33 +711,58 @@ export default function CheckoutPage() {
                     </span>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
-                    <label htmlFor="promoCode" className="sr-only">
-                      Promo code
-                    </label>
-                    <input
-                      id="promoCode"
-                      type="text"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-400 text-gray-900 placeholder:text-gray-400"
-                      placeholder="Enter promo code"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleApplyPromo}
-                      className="px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
-                    >
-                      Apply
-                    </button>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <label htmlFor="promoCode" className="sr-only">
+                        Promo code
+                      </label>
+                      <input
+                        id="promoCode"
+                        type="text"
+                        value={promoCode}
+                        onChange={(e) => {
+                          setPromoCode(e.target.value);
+                          setPromoError('');
+                        }}
+                        disabled={isApplyingPromo}
+                        className={`flex-1 px-4 py-3 border rounded-lg focus:outline-none focus:border-yellow-400 text-gray-900 placeholder:text-gray-400 ${
+                          promoError ? 'border-red-300' : 'border-gray-200'
+                        } ${isApplyingPromo ? 'bg-gray-100' : ''}`}
+                        placeholder="Enter promo code"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyPromo}
+                        disabled={isApplyingPromo}
+                        className={`px-6 py-3 font-medium rounded-lg transition-colors min-w-[100px] ${
+                          isApplyingPromo
+                            ? 'bg-gray-400 text-white cursor-not-allowed'
+                            : 'bg-gray-900 text-white hover:bg-gray-800'
+                        }`}
+                      >
+                        {isApplyingPromo ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                          </span>
+                        ) : (
+                          'Apply'
+                        )}
+                      </button>
+                    </div>
+                    {promoError && (
+                      <p className="text-red-500 text-sm">{promoError}</p>
+                    )}
                   </div>
                 )}
               </CheckoutSection>
             )}
 
-            {/* Section 7: Order Summary */}
+            {/* Order Summary */}
             {hasStartedCheckout && (
-              <CheckoutSection number={7} title="Order Summary">
+              <CheckoutSection title="Order Summary">
                 {/* Items */}
                 <div className="space-y-3 mb-4">
                   {items.map((item) => (
@@ -651,5 +833,33 @@ export default function CheckoutPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+// Loading fallback for Suspense
+function CheckoutLoading() {
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-gray-50 pt-4">
+        <div className="max-w-2xl mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+            <div className="h-48 bg-gray-200 rounded-2xl"></div>
+            <div className="h-48 bg-gray-200 rounded-2xl"></div>
+            <div className="h-48 bg-gray-200 rounded-2xl"></div>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<CheckoutLoading />}>
+      <CheckoutContent />
+    </Suspense>
   );
 }

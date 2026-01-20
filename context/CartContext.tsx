@@ -21,6 +21,13 @@ export interface CartItem {
     createdAt: Date;
     }
 
+    export interface DeliveryInfo {
+        type: 'pickup' | 'delivery' | null;
+        location: string | null;
+        date: string | null;
+        time: string | null;
+    }
+
     interface CartContextType {
         items: CartItem[];
         isCartOpen: boolean;
@@ -29,16 +36,18 @@ export interface CartItem {
         currentOrder: Order | null;
         totalItems: number;
         totalPrice: number;
+        deliveryInfo: DeliveryInfo;
         addItem: (item: Omit<CartItem, 'quantity'>) => void;
         removeItem: (id: string) => void;
         updateQuantity: (id: string, quantity: number) => void;
         clearCart: () => void;
         openCart: () => void;
-        closeCart: () => void;  
+        closeCart: () => void;
         openCheckout: () => void;
         closeCheckout: () => void;
         openConfirmation: (order: Order) => void;
         closeConfirmation: () => void;
+        updateDeliveryInfo: (info: Partial<DeliveryInfo>) => void;
     }
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -111,6 +120,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setCurrentOrder(null);
     };
 
+    const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({
+        type: null,
+        location: null,
+        date: null,
+        time: null,
+    });
+
+    const updateDeliveryInfo = (info: Partial<typeof deliveryInfo>) => {
+        setDeliveryInfo((prev) => ({ ...prev, ...info }));
+    }
+
     return (
         <CartContext.Provider
             value={{
@@ -121,6 +141,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 currentOrder,
                 totalItems,
                 totalPrice,
+                deliveryInfo,
                 addItem,
                 removeItem,
                 updateQuantity,
@@ -131,6 +152,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 closeCheckout,
                 openConfirmation,
                 closeConfirmation,
+                updateDeliveryInfo,
             }}
         >
             {children}
