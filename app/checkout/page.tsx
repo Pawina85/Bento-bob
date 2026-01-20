@@ -255,8 +255,8 @@ export default function CheckoutPage() {
           </div>
 
           <form onSubmit={handlePlaceOrder} className="space-y-8" noValidate>
-            {/* Section 1: Account */}
-            <CheckoutSection number={1} title="Account">
+            {/* Account */}
+            <CheckoutSection title="Account">
               {!hasStartedCheckout ? (
                 <div className="space-y-4">
                   <p className="text-gray-600 text-sm">
@@ -300,9 +300,9 @@ export default function CheckoutPage() {
               )}
             </CheckoutSection>
 
-            {/* Section 2: Contact */}
+            {/* Contact */}
             {hasStartedCheckout && (
-              <CheckoutSection number={2} title="Contact">
+              <CheckoutSection title="Contact">
                 <div className="space-y-4">
                   <Input
                     type="email"
@@ -330,9 +330,9 @@ export default function CheckoutPage() {
               </CheckoutSection>
             )}
 
-            {/* Section 3: Delivery Address */}
+            {/* Delivery Address */}
             {hasStartedCheckout && (
-              <CheckoutSection number={3} title="Delivery Address">
+              <CheckoutSection title="Delivery Address">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <Input
@@ -397,21 +397,21 @@ export default function CheckoutPage() {
               </CheckoutSection>
             )}
 
-            {/* Section 4: Delivery Time */}
+            {/* Delivery */}
             {hasStartedCheckout && (
-              <CheckoutSection number={4} title="Delivery Time">
-                <div className="p-4 border-2 border-yellow-400 bg-yellow-50 rounded-xl">
+              <CheckoutSection title="Delivery">
+                <div className="p-4 border border-gray-200 rounded-xl">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl" role="img" aria-label="Delivery truck">
                         🚚
                       </span>
                       <div>
-                        <p className="font-semibold text-gray-900">Same-Day Delivery</p>
+                        <p className="font-medium text-gray-900">Same-Day Delivery</p>
                         <p className="text-gray-500 text-sm">Delivered within 2-4 hours</p>
                       </div>
                     </div>
-                    <span className="font-bold text-gray-900">
+                    <span className="font-semibold text-gray-900">
                       {CURRENCY}{DELIVERY_FEE}
                     </span>
                   </div>
@@ -419,9 +419,9 @@ export default function CheckoutPage() {
               </CheckoutSection>
             )}
 
-            {/* Section 5: Payment */}
+            {/* Payment */}
             {hasStartedCheckout && (
-              <CheckoutSection number={5} title="Payment">
+              <CheckoutSection title="Payment">
                 <div className="space-y-3" role="radiogroup" aria-label="Payment method">
                   {/* Credit/Debit Card */}
                   <button
@@ -527,9 +527,9 @@ export default function CheckoutPage() {
               </CheckoutSection>
             )}
 
-            {/* Section 6: Promo Code */}
+            {/* Promo Code */}
             {hasStartedCheckout && (
-              <CheckoutSection number={6} title="Promo Code">
+              <CheckoutSection title="Promo Code">
                 {promoApplied ? (
                   <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-xl">
                     <div className="flex items-center gap-2 text-green-700">
@@ -578,9 +578,9 @@ export default function CheckoutPage() {
               </CheckoutSection>
             )}
 
-            {/* Section 7: Order Summary */}
+            {/* Order Summary */}
             {hasStartedCheckout && (
-              <CheckoutSection number={7} title="Order Summary">
+              <CheckoutSection title="Order Summary">
                 {/* Items */}
                 <div className="space-y-3 mb-4">
                   {items.map((item) => (
