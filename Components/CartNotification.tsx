@@ -1,38 +1,49 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart, CartItem } from '@/context/CartContext';
 
 export default function CartNotification() {
     const { items, totalItems } = useCart();
+    const pathname = usePathname();
     const [isVisible, setIsVisible] = useState(false);
     const [lastAddedItem, setLastAddedItem] = useState<CartItem | null>(null);
-    const [prevItemsLength, setPrevItemsLength] = useState(0);
+    const prevTotalref = useRef(totalItems);
+
+    const hideOnpages = ['/cart', '/checkout'];
+    const shouldHide = hideOnpages.includes(pathname);
 
     useEffect(() => {
 
-        if (items.length > 0 && items.length > prevItemsLength) {
-            const latestItem = items[items.length - 1];
-
-            if (items.length > prevItemsLength || 
-                (lastAddedItem && latestItem.id === lastAddedItem.id && latestItem.quantity > (lastAddedItem.quantity || 0))) {
-                setLastAddedItem(latestItem);
-                setIsVisible(true);
-
-                const timer = setTimeout(() => {
-                    setIsVisible(false);
-                }, 3000);
-
-                return () => clearTimeout(timer);
-            }
+        if (shouldHide) {
+            setIsVisible(false);
+            return;
         }
 
-        setPrevItemsLength(items.length);
-    }, [items, prevItemsLength, lastAddedItem]);
+        if (totalItems > prevTotalref.current && items.length > 0) {
 
+            const latestItem = items[items.length - 1];
+            setLastAddedItem(latestItem);
+            setIsVisible(true);
+
+            const timer = setTimeout(() => {
+                setIsVisible(false);
+            }, 3000);
+
+            prevTotalref.current = totalItems;
+            
+            return () => clearTimeout(timer);
+        }
+        prevTotalref.current = totalItems;
+    }, [totalItems, items, shouldHide]);
+
+    if (shouldHide) return null;
+    
     if (!isVisible || !lastAddedItem) return null;
+
 
     return (
         <div className="fixed top-24 right-4 z-50 animate-slide-in">
