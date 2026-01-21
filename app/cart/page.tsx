@@ -124,6 +124,8 @@ export default function CartPage() {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isTimeOpen, setIsTimeOpen] = useState(false);
 
   const calendarData = generateCalendarData(currentYear, currentMonth);
   const monthName = new Date(currentYear, currentMonth).toLocaleDateString('en-US', { 
@@ -152,6 +154,32 @@ export default function CartPage() {
   // Prevent going to past months
   const canGoPrev = currentYear > today.getFullYear() || 
     (currentYear === today.getFullYear() && currentMonth > today.getMonth());
+
+  const handleDateSelect = (dateValue: string) => {
+    setSelectedDate(dateValue);
+    setIsCalendarOpen(false);
+    // Auto-open time picker after selecting date
+    setIsTimeOpen(true);
+  };
+
+  const handleTimeSelect = (timeValue: string) => {
+    setSelectedTime(timeValue);
+    setIsTimeOpen(false);
+  };
+
+  const formatSelectedDate = (dateString: string) => {
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const formatSelectedTime = (timeValue: string) => {
+    const slot = TIME_SLOTS.find(t => t.value === timeValue);
+    return slot?.label || timeValue;
+  };
 
   const hasSelectedDateTime = selectedDate && selectedTime;
   const canCheckout = hasSelectedDateTime && (deliveryOption === 'delivery' || (deliveryOption === 'pickup' && selectedLocation));
@@ -354,120 +382,160 @@ export default function CartPage() {
 
                 {/* Date & Time Selection */}
                 {deliveryOption && (
-                  <div className="mt-6 max-w-md mx-auto">
-                    <p className="text-sm text-gray-600 mb-3">
-                      Select {deliveryOption === 'pickup' ? 'pickup' : 'delivery'} date & time:
-                    </p>
-
-                    {/* Calendar Date Picker */}
-                    <div className="mb-4">
-                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                        {/* Month Navigation Header */}
-                        <div className="flex items-center justify-between mb-4">
-                          <button
-                            onClick={goToPrevMonth}
-                            disabled={!canGoPrev}
-                            className={`p-1 rounded-full transition-colors ${
-                              canGoPrev 
-                                ? 'hover:bg-gray-100 text-gray-600' 
-                                : 'text-gray-300 cursor-not-allowed'
-                            }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                          </button>
-                          <h3 className="text-base font-medium text-gray-900">
-                            {monthName}
-                          </h3>
-                          <button
-                            onClick={goToNextMonth}
-                            className="p-1 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </button>
-                        </div>
-
-                        {/* Weekday Headers */}
-                        <div className="grid grid-cols-7 gap-1 mb-2">
-                          {WEEKDAYS.map((day) => (
-                            <div 
-                              key={day} 
-                              className="text-center text-xs font-medium text-gray-400 py-2"
-                            >
-                              {day}
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Calendar Grid */}
-                        <div className="grid grid-cols-7 gap-1">
-                          {calendarData.map((dateObj, index) => (
-                            <button
-                              key={index}
-                              onClick={() => dateObj.isAvailable && setSelectedDate(dateObj.value)}
-                              disabled={!dateObj.isAvailable}
-                              className={`
-                                aspect-square flex items-center justify-center text-sm rounded-lg transition-all
-                                ${!dateObj.isCurrentMonth 
-                                  ? 'text-gray-300' 
-                                  : dateObj.isAvailable
-                                    ? selectedDate === dateObj.value
-                                      ? 'bg-yellow-400 text-gray-900 font-bold'
-                                      : 'text-gray-900 font-medium hover:bg-yellow-100'
-                                    : 'text-gray-300'
-                                }
-                                ${dateObj.isToday && selectedDate !== dateObj.value ? 'ring-1 ring-yellow-400 ring-inset' : ''}
-                                ${dateObj.isAvailable ? 'cursor-pointer' : 'cursor-default'}
-                              `}
-                            >
-                              {dateObj.day}
-                            </button>
-                          ))}
-                        </div>
-
-                        {/* Calendar Icon & Label */}
-                        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-100">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mt-6 max-w-sm mx-auto space-y-3">
+                    
+                    {/* Date Picker - Collapsible */}
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      {/* Date Picker Header/Trigger */}
+                      <button
+                        onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          <span className="text-xs text-gray-500">
-                            {selectedDate 
-                              ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { 
-                                  weekday: 'long', 
-                                  month: 'long', 
-                                  day: 'numeric' 
-                                })
-                              : 'Choose a date'
-                            }
+                          <span className={`text-sm ${selectedDate ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+                            {selectedDate ? formatSelectedDate(selectedDate) : 'Choose a date'}
                           </span>
+                        </div>
+                        <svg 
+                          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isCalendarOpen ? 'rotate-180' : ''}`} 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      {/* Calendar Content - Expandable */}
+                      <div 
+                        className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                          isCalendarOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                        }`}
+                      >
+                        <div className="px-4 pb-4 border-t border-gray-100">
+                          {/* Month Navigation */}
+                          <div className="flex items-center justify-between py-3">
+                            <button
+                              onClick={goToPrevMonth}
+                              disabled={!canGoPrev}
+                              className={`p-1.5 rounded-full transition-colors ${
+                                canGoPrev 
+                                  ? 'hover:bg-gray-100 text-gray-600' 
+                                  : 'text-gray-300 cursor-not-allowed'
+                              }`}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                              </svg>
+                            </button>
+                            <span className="text-sm font-medium text-gray-900">
+                              {monthName}
+                            </span>
+                            <button
+                              onClick={goToNextMonth}
+                              className="p-1.5 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          </div>
+
+                          {/* Weekday Headers */}
+                          <div className="grid grid-cols-7 gap-0.5 mb-1">
+                            {WEEKDAYS.map((day) => (
+                              <div 
+                                key={day} 
+                                className="text-center text-[10px] font-medium text-gray-400 py-1"
+                              >
+                                {day}
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Calendar Grid */}
+                          <div className="grid grid-cols-7 gap-0.5">
+                            {calendarData.map((dateObj, index) => (
+                              <button
+                                key={index}
+                                onClick={() => dateObj.isAvailable && handleDateSelect(dateObj.value)}
+                                disabled={!dateObj.isAvailable}
+                                className={`
+                                  aspect-square flex items-center justify-center text-xs rounded-md transition-all
+                                  ${!dateObj.isCurrentMonth 
+                                    ? 'text-gray-300' 
+                                    : dateObj.isAvailable
+                                      ? selectedDate === dateObj.value
+                                        ? 'bg-yellow-400 text-gray-900 font-bold'
+                                        : 'text-gray-900 font-medium hover:bg-yellow-100'
+                                      : 'text-gray-300'
+                                  }
+                                  ${dateObj.isToday && selectedDate !== dateObj.value ? 'ring-1 ring-yellow-400 ring-inset' : ''}
+                                  ${dateObj.isAvailable ? 'cursor-pointer' : 'cursor-default'}
+                                `}
+                              >
+                                {dateObj.day}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Time Selection */}
-                    {selectedDate && (
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-2 uppercase tracking-wide">Time</label>
-                        <div className="grid grid-cols-4 gap-2">
-                          {TIME_SLOTS.map((time) => (
-                            <button
-                              key={time.value}
-                              onClick={() => setSelectedTime(time.value)}
-                              className={`p-2 rounded-lg border-2 text-center transition-all text-sm ${
-                                selectedTime === time.value
-                                  ? 'border-yellow-400 bg-yellow-50'
-                                  : 'border-gray-200 hover:border-gray-300 bg-white'
-                              }`}
-                            >
-                              {time.label}
-                            </button>
-                          ))}
+                    {/* Time Picker - Collapsible */}
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      {/* Time Picker Header/Trigger */}
+                      <button
+                        onClick={() => setIsTimeOpen(!isTimeOpen)}
+                        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className={`text-sm ${selectedTime ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+                            {selectedTime ? formatSelectedTime(selectedTime) : 'Choose a time'}
+                          </span>
+                        </div>
+                        <svg 
+                          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isTimeOpen ? 'rotate-180' : ''}`} 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      {/* Time Slots Content - Expandable */}
+                      <div 
+                        className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                          isTimeOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'
+                        }`}
+                      >
+                        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+                          <div className="grid grid-cols-3 gap-2">
+                            {TIME_SLOTS.map((time) => (
+                              <button
+                                key={time.value}
+                                onClick={() => handleTimeSelect(time.value)}
+                                className={`py-2 px-1 rounded-md text-xs font-medium transition-all ${
+                                  selectedTime === time.value
+                                    ? 'bg-yellow-400 text-gray-900'
+                                    : 'bg-gray-50 text-gray-700 hover:bg-yellow-100'
+                                }`}
+                              >
+                                {time.label}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    )}
+                    </div>
+
                   </div>
                 )}
               </div>
