@@ -26,19 +26,74 @@ const PICKUP_LOCATIONS = [
 
 const DELIVERY_FEE = 2.0;
 
-// Generate available dates (next 7 days)
-const generateAvailableDates = () => {
-  const dates = [];
+// Generate calendar data for a specific month
+const generateCalendarData = (year: number, month: number) => {
   const today = new Date();
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-    dates.push({
+  today.setHours(0, 0, 0, 0);
+  
+  const firstDayOfMonth = new Date(year, month, 1);
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  const daysInMonth = lastDayOfMonth.getDate();
+  const startingDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday
+  
+  // Get days from previous month to fill first row
+  const prevMonth = new Date(year, month, 0);
+  const daysInPrevMonth = prevMonth.getDate();
+  
+  const calendar: Array<{
+    day: number;
+    value: string;
+    isCurrentMonth: boolean;
+    isAvailable: boolean;
+    isToday: boolean;
+  }> = [];
+  
+  // Add previous month's trailing days
+  for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+    const day = daysInPrevMonth - i;
+    const date = new Date(year, month - 1, day);
+    calendar.push({
+      day,
       value: date.toISOString().split('T')[0],
-      label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+      isCurrentMonth: false,
+      isAvailable: false,
+      isToday: false,
     });
   }
-  return dates;
+  
+  // Add current month's days
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    date.setHours(0, 0, 0, 0);
+    
+    // Available if date is today or in the future (within 30 days)
+    const maxDate = new Date(today);
+    maxDate.setDate(today.getDate() + 30);
+    const isAvailable = date >= today && date <= maxDate;
+    
+    calendar.push({
+      day,
+      value: date.toISOString().split('T')[0],
+      isCurrentMonth: true,
+      isAvailable,
+      isToday: date.getTime() === today.getTime(),
+    });
+  }
+  
+  // Add next month's leading days to complete the grid (6 rows × 7 days = 42)
+  const remainingDays = 42 - calendar.length;
+  for (let day = 1; day <= remainingDays; day++) {
+    const date = new Date(year, month + 1, day);
+    calendar.push({
+      day,
+      value: date.toISOString().split('T')[0],
+      isCurrentMonth: false,
+      isAvailable: false,
+      isToday: false,
+    });
+  }
+  
+  return calendar;
 };
 
 // Generate available time slots
@@ -56,14 +111,48 @@ const TIME_SLOTS = [
   { value: '20:00', label: '8:00 PM' },
 ];
 
+const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
 export default function CartPage() {
   const { items, updateQuantity, removeItem, totalPrice, updateDeliveryInfo } = useCart();
   const [deliveryOption, setDeliveryOption] = useState<'pickup' | 'delivery' | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  
+  // Calendar state
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
-  const availableDates = generateAvailableDates();
+  const calendarData = generateCalendarData(currentYear, currentMonth);
+  const monthName = new Date(currentYear, currentMonth).toLocaleDateString('en-US', { 
+    month: 'long', 
+    year: 'numeric' 
+  });
+
+  const goToPrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+
+  const goToNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
+
+  // Prevent going to past months
+  const canGoPrev = currentYear > today.getFullYear() || 
+    (currentYear === today.getFullYear() && currentMonth > today.getMonth());
+
   const hasSelectedDateTime = selectedDate && selectedTime;
   const canCheckout = hasSelectedDateTime && (deliveryOption === 'delivery' || (deliveryOption === 'pickup' && selectedLocation));
   const finalTotal = deliveryOption === 'delivery' ? totalPrice + DELIVERY_FEE : totalPrice;
@@ -270,38 +359,91 @@ export default function CartPage() {
                       Select {deliveryOption === 'pickup' ? 'pickup' : 'delivery'} date & time:
                     </p>
 
-                    {/* Date Selection */}
+                    {/* Calendar Date Picker */}
                     <div className="mb-4">
-                      <label className="block text-xs text-gray-500 mb-2 uppercase tracking-wide">Date</label>
-                      <div className="grid grid-cols-4 gap-2">
-                        {availableDates.slice(0, 4).map((date) => (
+                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                        {/* Month Navigation Header */}
+                        <div className="flex items-center justify-between mb-4">
                           <button
-                            key={date.value}
-                            onClick={() => setSelectedDate(date.value)}
-                            className={`p-2 rounded-lg border-2 text-center transition-all text-sm ${
-                              selectedDate === date.value
-                                ? 'border-yellow-400 bg-yellow-50'
-                                : 'border-gray-200 hover:border-gray-300 bg-white'
+                            onClick={goToPrevMonth}
+                            disabled={!canGoPrev}
+                            className={`p-1 rounded-full transition-colors ${
+                              canGoPrev 
+                                ? 'hover:bg-gray-100 text-gray-600' 
+                                : 'text-gray-300 cursor-not-allowed'
                             }`}
                           >
-                            {date.label}
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
                           </button>
-                        ))}
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 mt-2">
-                        {availableDates.slice(4).map((date) => (
+                          <h3 className="text-base font-medium text-gray-900">
+                            {monthName}
+                          </h3>
                           <button
-                            key={date.value}
-                            onClick={() => setSelectedDate(date.value)}
-                            className={`p-2 rounded-lg border-2 text-center transition-all text-sm ${
-                              selectedDate === date.value
-                                ? 'border-yellow-400 bg-yellow-50'
-                                : 'border-gray-200 hover:border-gray-300 bg-white'
-                            }`}
+                            onClick={goToNextMonth}
+                            className="p-1 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
                           >
-                            {date.label}
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                           </button>
-                        ))}
+                        </div>
+
+                        {/* Weekday Headers */}
+                        <div className="grid grid-cols-7 gap-1 mb-2">
+                          {WEEKDAYS.map((day) => (
+                            <div 
+                              key={day} 
+                              className="text-center text-xs font-medium text-gray-400 py-2"
+                            >
+                              {day}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Calendar Grid */}
+                        <div className="grid grid-cols-7 gap-1">
+                          {calendarData.map((dateObj, index) => (
+                            <button
+                              key={index}
+                              onClick={() => dateObj.isAvailable && setSelectedDate(dateObj.value)}
+                              disabled={!dateObj.isAvailable}
+                              className={`
+                                aspect-square flex items-center justify-center text-sm rounded-lg transition-all
+                                ${!dateObj.isCurrentMonth 
+                                  ? 'text-gray-300' 
+                                  : dateObj.isAvailable
+                                    ? selectedDate === dateObj.value
+                                      ? 'bg-yellow-400 text-gray-900 font-bold'
+                                      : 'text-gray-900 font-medium hover:bg-yellow-100'
+                                    : 'text-gray-300'
+                                }
+                                ${dateObj.isToday && selectedDate !== dateObj.value ? 'ring-1 ring-yellow-400 ring-inset' : ''}
+                                ${dateObj.isAvailable ? 'cursor-pointer' : 'cursor-default'}
+                              `}
+                            >
+                              {dateObj.day}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Calendar Icon & Label */}
+                        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-100">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="text-xs text-gray-500">
+                            {selectedDate 
+                              ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { 
+                                  weekday: 'long', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })
+                              : 'Choose a date'
+                            }
+                          </span>
+                        </div>
                       </div>
                     </div>
 
