@@ -24,16 +24,13 @@ export default function MenuPage() {
       <main className="min-h-screen bg-gray-50 pt-4">
         <div className="max-w-7xl mx-auto px-4 py-8">
 
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Our Menu</h1>
-          <p className="text-gray-600 mb-8">Fresh ingredients, bold flavors</p>
-
           {/* Category Tabs */}
-          <div className="flex gap-4 overflow-x-auto pb-4 mb-8 scrollbar-hide">
+          <div className="grid grid-cols-2 sm:flex gap-3 pb-4 mb-8">
             {categories.map(category => (
               <button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-full whitespace-nowrap transition-all ${
+                className={`flex items-center justify-center sm:justify-start gap-2 px-4 py-3 rounded-full whitespace-nowrap transition-all ${
                   activeCategory === category.id
                     ? 'bg-yellow-400 text-gray-900 font-semibold shadow-md'
                     : 'bg-white text-gray-600 hover:bg-yellow-100 border border-gray-200'
