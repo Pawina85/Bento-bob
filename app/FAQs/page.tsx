@@ -157,7 +157,7 @@ export default function FAQPage() {
           </div>
 
           {/* Contact CTA */}
-          <div className="mt-12 text-center bg-yellow-50 rounded-2xl p-8">
+          <div className="mt-12 text-center bg-gray-300 rounded-2xl p-8">
             <h2 className="text-xl font-bold text-gray-900 mb-2">
               Still have questions?
             </h2>
@@ -167,15 +167,15 @@ export default function FAQPage() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a
                 href="mailto:hello@bentobop.com"
-                className="inline-block bg-white border-2 border-gray-900 text-gray-900 font-semibold px-6 py-3 rounded-full hover:bg-gray-900 hover:text-white transition-colors"
+                className="inline-block bg-white border-2 border-gray-900 text-gray-900 font-semibold px-6 py-3 rounded-full hover:bg-yellow-500 hover:text-white transition-colors hover:border-none"
               >
-                📧 Email Us
+                 Email Us
               </a>
               <a
                 href="/contact"
-                className="inline-block bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-6 py-3 rounded-full transition-all"
+                className="inline-block bg-gray-800 hover:bg-yellow-500 text-white font-semibold px-6 py-3 rounded-full transition-all"
               >
-                💬 Contact Page
+                 Contact us
               </a>
             </div>
           </div>
